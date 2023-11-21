@@ -17,7 +17,7 @@ def create_item():
     request_data = request.get_json()
     new_item_id = str(max([int(id) for id in items.keys()] or [0]) + 1)
     items[new_item_id] = {'name': request_data['name']}
-    return jsonify(items[new_item_id])
+    return jsonify({'id': new_item_id, 'name': request_data['name']})
 
 @app.route('/items', methods=['GET'])
 def get_items():
