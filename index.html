@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask CRUD Test</title>
+</head>
+<body>
+    <h1>Flask CRUD Test</h1>
+
+    <!-- 아이템 생성 폼 -->
+    <div>
+        <input type="text" id="itemName" placeholder="Enter item name">
+        <button onclick="createItem()">Create Item</button>
+    </div>
+
+    <!-- 아이템 리스트 표시 -->
+    <div>
+        <h2>Items</h2>
+        <ul id="itemsList"></ul>
+    </div>
+
+    <script>
+        function createItem() {
+            var itemName = document.getElementById('itemName').value;
+            fetch('/item', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({name: itemName})
+            })
+            .then(response => response.json())
+            .then(data => {
+                getItems();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getItems() {
+            fetch('/items')
+            .then(response => response.json())
+            .then(data => {
+                const itemsList = document.getElementById('itemsList');
+                itemsList.innerHTML = '';
+                for (const id in data) {
+                    const item = data[id];
+                    const listItem = document.createElement('li');
+
+                    const itemText = document.createTextNode(item.name);
+                    listItem.appendChild(itemText);
+
+                    const updateButton = document.createElement('button');
+                    updateButton.textContent = 'Update';
+                    updateButton.onclick = function() {
+                        updateItem(id);
+                    };
+                    listItem.appendChild(updateButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.onclick = function() {
+                        deleteItem(id);
+                    };
+                    listItem.appendChild(deleteButton);
+
+                    itemsList.appendChild(listItem);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateItem(id) {
+            var newName = prompt("Enter new name for the item:");
+            if (newName) {
+                fetch(`/item/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({name: newName})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    getItems();
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function deleteItem(id) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                fetch(`/item/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    getItems();
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        getItems();
+    </script>
+</body>
+</html>
