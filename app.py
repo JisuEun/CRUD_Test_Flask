@@ -25,18 +25,28 @@ def get_items():
 
 @app.route('/item/<string:id>', methods=['GET'])
 def get_item(id):
-    return jsonify(items[id])
+    item = items.get(id, None)
+    if item:
+        return jsonify({'id': id, 'name': item['name']})
+    else:
+        return jsonify({'error': 'Item not found'}), 404
 
 @app.route('/item/<string:id>', methods=['PUT'])
 def update_item(id):
     request_data = request.get_json()
-    items[id]['name'] = request_data['name']
-    return jsonify(items[id])
+    if id in items:
+        items[id]['name'] = request_data['name']
+        return jsonify({'id': id, 'name': request_data['name']})
+    else:
+        return jsonify({'error': 'Item not found'}), 404
 
 @app.route('/item/<string:id>', methods=['DELETE'])
 def delete_item(id):
-    del items[id]
-    return jsonify({'message': 'Item deleted'})
+    if id in items:
+        del items[id]
+        return jsonify({'message': 'Item deleted'})
+    else:
+        return jsonify({'error': 'Item not found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
